@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { saveDiagnostic } from "@/app/dashboard/diagnostic/actions";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -245,6 +246,7 @@ export function generateProfile(scores: DiagnosticScores): {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function DiagnosticPapaChat() {
+  const router = useRouter();
   const [step, setStep] = useState<number>(STEPS.INTRO);
   const [formData, setFormData] = useState<FormData>({});
   const [messages, setMessages] = useState<Message[]>([]);
@@ -263,15 +265,22 @@ export default function DiagnosticPapaChat() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(0);
+  const introSentRef = useRef(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Message d'introduction au premier rendu
+  // Message d'introduction au premier rendu (une seule fois, même en Strict Mode)
   useEffect(() => {
-    addBotMessage(MESSAGE_INTRO);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (introSentRef.current) return;
+    introSentRef.current = true;
+    setIsTyping(true);
+    const id = nextId.current++;
+    setTimeout(() => {
+      setMessages((prev) => [...prev, { id, sender: "bot", text: MESSAGE_INTRO }]);
+      setIsTyping(false);
+    }, 500);
   }, []);
 
   // ─── Helpers messages ─────────────────────────────────────────────────────
@@ -484,6 +493,8 @@ export default function DiagnosticPapaChat() {
         "Tes réponses ont bien été enregistrées. Un membre de l'équipe te contactera prochainement."
       );
       setStep(-1);
+      // Retirer la fiche dialogue et afficher uniquement la carte météo
+      router.replace("/dashboard/diagnostic");
     } else {
       setSubmitStatus("error");
       setSubmitError(res.error);
@@ -748,7 +759,7 @@ export default function DiagnosticPapaChat() {
     <div className="mx-auto flex h-[600px] max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-lg">
       <div className="border-b border-slate-200 bg-white px-6 py-4">
         <h2 className="text-base font-semibold text-slate-800">
-          Diagnostic de situation
+          Évaluation de situation
         </h2>
         <p className="text-xs text-slate-500">
           Confidentiel · Association d&apos;accompagnement
@@ -789,7 +800,7 @@ export default function DiagnosticPapaChat() {
           <div className="flex justify-start">
             <div className="max-w-[90%] rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <h3 className="mb-3 text-sm font-semibold text-slate-800">
-                Résultats de ton diagnostic
+                Résultats de ton évaluation
               </h3>
               <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
                 <div className="rounded-lg bg-slate-50 px-3 py-2">

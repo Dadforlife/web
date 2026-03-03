@@ -2,11 +2,21 @@
 
 import { createContext, useContext } from "react";
 
+export interface DashboardEnfant {
+  id: string;
+  prenom: string;
+  sexe: "garcon" | "fille";
+}
+
 export interface DashboardUser {
   email: string;
   fullName: string;
   phone: string;
   createdAt: string;
+  primaryRole: string;
+  roles: string[];
+  volunteerRole?: string;
+  enfants: DashboardEnfant[];
 }
 
 interface DashboardContextType {

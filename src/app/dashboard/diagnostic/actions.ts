@@ -1,6 +1,7 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export type DiagnosticFormData = {
   situation?: string;
@@ -37,42 +38,28 @@ export async function saveDiagnostic(
   result: DiagnosticResultPayload
 ): Promise<{ success: true; id: string } | { success: false; error: string }> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
+    const session = await auth();
+    if (!session?.user?.id) {
       return { success: false, error: "Non connecté. Reconnecte-toi puis réessaie." };
     }
 
-    const { data: row, error } = await supabase
-      .from("diagnostics")
-      .insert({
-        user_id: user.id,
-        form_data: formData,
-        score_tension: result.scores.tension,
-        score_risque_juridique: result.scores.risqueJuridique,
-        score_stabilite_emotionnelle: result.scores.stabiliteEmotionnelle,
-        score_preparation_strategique: result.scores.preparationStrategique,
-        score_global: result.globalRisk,
+    const row = await prisma.diagnostic.create({
+      data: {
+        userId: session.user.id,
+        formData: formData as object,
+        scoreTension: result.scores.tension,
+        scoreRisqueJuridique: result.scores.risqueJuridique,
+        scoreStabiliteEmotionnelle: result.scores.stabiliteEmotionnelle,
+        scorePreparationStrategique: result.scores.preparationStrategique,
+        scoreGlobal: result.globalRisk,
         classification: result.classification,
-        plan_title: result.planTitle,
-        plan_content: result.planContent,
-      })
-      .select("id")
-      .single();
+        planTitle: result.planTitle,
+        planContent: result.planContent,
+      },
+      select: { id: true },
+    });
 
-    if (error) {
-      console.error("saveDiagnostic error:", error);
-      return {
-        success: false,
-        error: error.message ?? "Erreur lors de l'enregistrement.",
-      };
-    }
-
-    return { success: true, id: (row?.id as string) ?? "" };
+    return { success: true, id: row.id };
   } catch (e) {
     console.error("saveDiagnostic exception:", e);
     return {
@@ -82,7 +69,6 @@ export async function saveDiagnostic(
   }
 }
 
-/** Dernier diagnostic enregistré (pour affichage météo + plan) */
 export type LatestDiagnostic = {
   id: string;
   created_at: string;
@@ -98,26 +84,28 @@ export type LatestDiagnostic = {
 
 export async function getLatestDiagnostic(): Promise<LatestDiagnostic | null> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const session = await auth();
+    if (!session?.user?.id) return null;
 
-    if (userError || !user) return null;
+    const data = await prisma.diagnostic.findFirst({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+    });
 
-    const { data, error } = await supabase
-      .from("diagnostics")
-      .select(
-        "id, created_at, classification, score_global, plan_title, plan_content, score_tension, score_risque_juridique, score_stabilite_emotionnelle, score_preparation_strategique"
-      )
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    if (!data) return null;
 
-    if (error || !data) return null;
-    return data as LatestDiagnostic;
+    return {
+      id: data.id,
+      created_at: data.createdAt.toISOString(),
+      classification: data.classification,
+      score_global: Number(data.scoreGlobal),
+      plan_title: data.planTitle,
+      plan_content: data.planContent,
+      score_tension: data.scoreTension,
+      score_risque_juridique: data.scoreRisqueJuridique,
+      score_stabilite_emotionnelle: data.scoreStabiliteEmotionnelle,
+      score_preparation_strategique: data.scorePreparationStrategique,
+    };
   } catch {
     return null;
   }

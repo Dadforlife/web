@@ -45,7 +45,7 @@ export function SectionMission() {
               Notre mission
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-              Ce que Dad for Life vous apporte
+              Ce que Papa pour la vie vous apporte
             </h2>
             <p className="text-muted-foreground text-lg mt-4 max-w-2xl mx-auto">
               Un accompagnement global, structur&eacute; autour de cinq axes essentiels

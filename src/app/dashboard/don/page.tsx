@@ -116,7 +116,7 @@ export default function DonPage() {
           </Button>
 
           <p className="text-xs text-muted-foreground">
-            Les dons sont gérés de manière sécurisée. Dad for Life est une association
+            Les dons sont gérés de manière sécurisée. Papa pour la vie est une association
             à but non lucratif. Merci pour ta générosité.
           </p>
         </CardContent>

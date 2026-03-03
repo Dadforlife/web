@@ -13,7 +13,7 @@ const steps = [
   },
   {
     icon: ClipboardCheck,
-    title: "Diagnostic obligatoire",
+    title: "Évaluation obligatoire",
     description:
       "Un entretien initial permet d\u2019évaluer votre situation personnelle et de définir vos besoins prioritaires.",
     accent: "warm",
@@ -22,7 +22,7 @@ const steps = [
     icon: Route,
     title: "Orientation personnalisée",
     description:
-      "Sur la base du diagnostic, vous êtes orienté vers les ressources et les professionnels adaptés à votre situation.",
+      "Sur la base de l'évaluation, vous êtes orienté vers les ressources et les professionnels adaptés à votre situation.",
     accent: "chart-2",
   },
 ];
@@ -49,34 +49,37 @@ export function SectionFonctionnement() {
   return (
     <section id="fonctionnement" className="py-20 sm:py-28 relative overflow-hidden scroll-mt-20">
       <div className="absolute inset-0 gradient-mesh" />
+      <div className="absolute left-1/2 top-20 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-[110px]" />
 
-      <div className="relative container mx-auto px-4 max-w-4xl">
+      <div className="relative container mx-auto px-4 max-w-5xl">
         <BlurFade delay={0} inView>
           <div className="text-center mb-14">
             <span className="inline-block text-sm font-semibold text-warm uppercase tracking-wider mb-3">
               Comment &ccedil;a fonctionne
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-              Trois &eacute;tapes simples
+              Une m&eacute;thode claire en 3 &eacute;tapes
             </h2>
             <p className="text-muted-foreground text-lg mt-4 max-w-2xl mx-auto">
-              Un processus clair et transparent pour vous accompagner d&egrave;s le premier contact.
+              Chaque &eacute;tape est pens&eacute;e pour vous faire avancer rapidement,
+              avec un accompagnement humain, discret et orient&eacute; r&eacute;sultats.
             </p>
           </div>
         </BlurFade>
 
-        <div className="space-y-5 max-w-2xl mx-auto">
+        <div className="relative space-y-5 max-w-3xl mx-auto">
+          <div className="absolute left-[33px] top-10 bottom-10 w-px bg-gradient-to-b from-primary/30 via-warm/20 to-chart-2/30" />
           {steps.map((step, i) => {
             const classes = accentClasses[step.accent];
             return (
               <BlurFade key={i} delay={0.15 + i * 0.12} inView>
                 <div
-                  className={`flex items-start gap-5 rounded-2xl bg-card/80 backdrop-blur-sm p-6 shadow-sm ${classes.border} hover:shadow-md transition-shadow`}
+                  className={`relative flex items-start gap-5 rounded-2xl border border-border/60 bg-card/85 backdrop-blur-sm p-6 shadow-sm ${classes.border} hover:shadow-md transition-all hover:-translate-y-0.5`}
                 >
                   <div className="flex flex-col items-center gap-2 shrink-0">
-                    <span className="text-xs font-bold text-muted-foreground">{i + 1}</span>
+                    <span className="text-xs font-bold text-muted-foreground">0{i + 1}</span>
                     <div
-                      className={`h-12 w-12 rounded-xl ${classes.bg} flex items-center justify-center`}
+                      className={`h-12 w-12 rounded-xl ${classes.bg} ring-1 ring-border/50 flex items-center justify-center`}
                     >
                       <step.icon className={`h-6 w-6 ${classes.icon}`} />
                     </div>
@@ -92,6 +95,17 @@ export function SectionFonctionnement() {
             );
           })}
         </div>
+
+        <BlurFade delay={0.5} inView>
+          <div className="mt-10 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <span className="inline-block h-2 w-2 rounded-full bg-chart-4" />
+            <span>Adh&eacute;sion gratuite</span>
+            <span className="text-border">•</span>
+            <span>&Eacute;valuation confidentielle</span>
+            <span className="text-border">•</span>
+            <span>Orientation personnalis&eacute;e</span>
+          </div>
+        </BlurFade>
       </div>
     </section>
   );

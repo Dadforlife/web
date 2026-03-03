@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { Sidebar } from "@/components/sidebar";
 import { DashboardProvider } from "@/components/dashboard-provider";
 
@@ -8,46 +9,57 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let user = null;
-  let supabase = null;
-
-  try {
-    supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-    user = authUser;
-  } catch {
-    // Supabase pas configuré
-  }
-
-  // Rediriger si non connecté
-  if (!user) {
+  const session = await auth();
+  if (!session?.user?.id) {
     redirect("/auth/login");
   }
 
-  // Vérifier que l'utilisateur a complété un diagnostic
-  if (supabase) {
-    try {
-      const { data: diagnostics } = await supabase
-        .from("diagnostics")
-        .select("id")
-        .eq("user_id", user.id)
-        .limit(1);
+  const userId = session.user.id;
 
-      if (!diagnostics || diagnostics.length === 0) {
-        redirect("/diagnostic");
-      }
-    } catch {
-      // En cas d'erreur, ne pas bloquer l'accès au dashboard
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!dbUser) {
+    redirect("/auth/login");
+  }
+
+  const { primaryRole, roles } = dbUser;
+
+  // Only papa_aide needs to complete the diagnostic before accessing the dashboard
+  if (primaryRole === "papa_aide" && !roles.includes("admin")) {
+    const diagnosticCount = await prisma.diagnostic.count({
+      where: { userId },
+    });
+    if (diagnosticCount === 0) {
+      redirect("/diagnostic");
     }
   }
 
+  let volunteerRole: string | undefined;
+  if (roles.includes("volunteer")) {
+    const profile = await prisma.volunteerProfile.findUnique({
+      where: { userId },
+      select: { volunteerRole: true },
+    });
+    volunteerRole = profile?.volunteerRole;
+  }
+
+  const enfants = await prisma.enfant.findMany({
+    where: { userId },
+    select: { id: true, prenom: true, sexe: true },
+    orderBy: { createdAt: "asc" },
+  });
+
   const dashboardUser = {
-    email: user.email ?? "",
-    fullName: user.user_metadata?.full_name ?? "",
-    phone: user.user_metadata?.phone ?? "",
-    createdAt: user.created_at ?? "",
+    email: dbUser.email,
+    fullName: dbUser.fullName,
+    phone: dbUser.phone ?? "",
+    createdAt: dbUser.createdAt.toISOString(),
+    primaryRole,
+    roles,
+    volunteerRole,
+    enfants: enfants.map((e) => ({ id: e.id, prenom: e.prenom, sexe: e.sexe as "garcon" | "fille" })),
   };
 
   return (
@@ -58,9 +70,9 @@ export default async function DashboardLayout({
             email: dashboardUser.email,
             fullName: dashboardUser.fullName,
           }}
+          primaryRole={primaryRole}
+          roles={roles}
         />
-
-        {/* Contenu principal */}
         <div className="lg:pl-64 min-h-screen transition-all duration-300">
           <main className="p-4 sm:p-6 lg:p-8">
             {children}

@@ -45,7 +45,7 @@ export function SectionProfessionnels() {
               Un annuaire de professionnels qualifi&eacute;s
             </h2>
             <p className="text-muted-foreground text-lg mt-4 max-w-2xl mx-auto">
-              Dad for Life s&apos;appuie sur un r&eacute;seau de partenaires
+              Papa pour la vie s&apos;appuie sur un r&eacute;seau de partenaires
               s&eacute;lectionn&eacute;s pour vous orienter vers les bons interlocuteurs.
             </p>
           </div>
@@ -76,7 +76,7 @@ export function SectionProfessionnels() {
         <BlurFade delay={0.5} inView>
           <p className="text-muted-foreground text-center text-sm font-medium">
             L&apos;acc&egrave;s &agrave; l&apos;annuaire est r&eacute;serv&eacute; aux
-            membres ayant r&eacute;alis&eacute; leur diagnostic.
+            membres ayant r&eacute;alis&eacute; leur évaluation.
           </p>
         </BlurFade>
       </div>

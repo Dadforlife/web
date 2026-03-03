@@ -523,7 +523,7 @@ export function DiagnosticForm({ isLoggedIn }: DiagnosticFormProps) {
                 {/* Source */}
                 <div className="space-y-2">
                   <label htmlFor="source" className={labelCls}>
-                    Comment avez-vous entendu parler de Dad for Life ?{" "}
+                    Comment avez-vous entendu parler de Papa pour la vie ?{" "}
                     <span className="text-destructive">*</span>
                   </label>
                   <div className="relative">

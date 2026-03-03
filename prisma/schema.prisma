@@ -1,0 +1,745 @@
+// Dad for Life – Neon PostgreSQL + Auth.js + Forum
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProfessionalRole {
+  benevole
+  avocat
+  mediateur
+  coach
+  psychologue
+}
+
+enum ProfessionalStatus {
+  en_attente
+  en_verification
+  valide
+  refuse
+  suspendu
+}
+
+enum ProfessionalLevel {
+  reference
+  valide
+  expert
+}
+
+enum ProfessionalDocumentType {
+  charte_signee
+  convention_signee
+  assurance
+  diplome
+  piece_identite
+}
+
+enum GeneratedDocumentType {
+  charte_ethique
+  convention_partenariat
+}
+
+enum AdminActionType {
+  professional_status_changed
+  professional_document_verified
+  professional_interview_scored
+  generated_document_created
+  gdpr_account_deleted
+}
+
+enum VolunteerRole {
+  accompagnateur_terrain
+  ecoute_soutien
+  expertise_metier
+}
+
+enum AppointmentType {
+  accompagnement_terrain
+  telephonique
+}
+
+enum AppointmentRequestStatus {
+  en_attente
+  accepte
+  refuse
+  annule
+}
+
+enum UserPrimaryRole {
+  papa_aide
+  maman_demande
+  papa_benevole
+  professionnel
+}
+
+enum AccompagnementRequestStatus {
+  pending
+  reviewing
+  contacted
+  active
+  completed
+  rejected
+}
+
+// ─── Auth.js models ─────────────────────────────────────────────────────────
+
+model User {
+  id              String          @id @default(uuid()) @db.Uuid
+  email           String          @unique
+  emailVerified   DateTime?       @map("email_verified")
+  passwordHash    String?         @map("password_hash")
+  fullName        String          @default("") @map("full_name")
+  phone           String?
+  primaryRole     UserPrimaryRole @default(papa_aide) @map("primary_role")
+  roles           String[]        @default(["member"])
+  avatarUrl       String?         @map("avatar_url")
+  status          String          @default("active") // active | suspended | banned
+  isVerifiedPapa  Boolean         @default(false) @map("is_verified_papa")
+  lastActiveAt    DateTime?       @map("last_active_at")
+  suspendedAt     DateTime?       @map("suspended_at")
+  suspendedReason String?         @map("suspended_reason")
+  professionalRole   ProfessionalRole?   @map("professional_role")
+  professionalStatus ProfessionalStatus? @default(en_attente) @map("professional_status")
+  professionalLevel  ProfessionalLevel?  @default(reference) @map("professional_level")
+  gdprDeletedAt      DateTime?           @map("gdpr_deleted_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  accounts                Account[]
+  sessions                Session[]
+  diagnostics             Diagnostic[]
+  discussions             Discussion[]
+  messages                Message[]
+  reports                 Report[]
+  notifications           Notification[]
+  notificationPreferences NotificationPreference?
+  contents                Content[]
+  payments                Payment[]
+  resolvedReports            Report[]              @relation("ReportResolver")
+  adminNotificationLogs      AdminNotificationLog[]
+  reviewedVolunteerApps      VolunteerApplication[] @relation("VolunteerAppReviewer")
+  volunteerApplications      VolunteerApplication[] @relation("VolunteerAppApplicant")
+  conversationsAsFather      PrivateConversation[]  @relation("ConversationFather")
+  conversationsAsVolunteer   PrivateConversation[]  @relation("ConversationVolunteer")
+  conversationsClosed        PrivateConversation[]  @relation("ConversationCloser")
+  privateMessages            PrivateMessage[]       @relation("PrivateMessageSender")
+  professionalVerification   ProfessionalVerification?
+  professionalDocuments      ProfessionalDocument[]
+  professionalReviewsGiven   ProfessionalReview[]     @relation("ProfessionalReviewAuthor")
+  professionalReviewsReceived ProfessionalReview[]    @relation("ProfessionalReviewRecipient")
+  generatedDocuments         GeneratedDocument[]
+  adminActionsDone           AdminActionLog[]         @relation("AdminActionActor")
+  adminActionsTargeted       AdminActionLog[]         @relation("AdminActionTarget")
+  professionalVerificationsValidated ProfessionalVerification[] @relation("ProfessionalVerificationAdmin")
+  professionalDocumentsVerified      ProfessionalDocument[]     @relation("ProfessionalDocumentVerifier")
+  volunteerProfile           VolunteerProfile?
+  papaAssignments            PapaAssignment[]         @relation("AssignedFather")
+  fatherAlerts               VolunteerAlert[]         @relation("AlertFather")
+  fatherAppointments         VolunteerAppointment[]   @relation("AppointmentFather")
+  accompagnementRequests     AccompagnementRequest[]
+  enfants                    Enfant[]
+  appointmentRequests        AppointmentRequest[]       @relation("AppointmentRequestUser")
+
+  @@index([status])
+  @@index([primaryRole])
+  @@index([professionalRole, professionalStatus])
+  @@index([professionalLevel])
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @map("user_id") @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id") @db.Uuid
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── Diagnostic ─────────────────────────────────────────────────────────────
+
+model Diagnostic {
+  id                          String   @id @default(uuid()) @db.Uuid
+  userId                      String   @map("user_id") @db.Uuid
+  createdAt                   DateTime @default(now()) @map("created_at")
+  formData                    Json     @map("form_data")
+  scoreTension                Int      @map("score_tension") @db.SmallInt
+  scoreRisqueJuridique        Int      @map("score_risque_juridique") @db.SmallInt
+  scoreStabiliteEmotionnelle  Int      @map("score_stabilite_emotionnelle") @db.SmallInt
+  scorePreparationStrategique Int      @map("score_preparation_strategique") @db.SmallInt
+  scoreGlobal                 Decimal  @map("score_global") @db.Decimal(5, 2)
+  classification              String
+  planTitle                   String   @map("plan_title")
+  planContent                 String   @map("plan_content")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("diagnostics")
+}
+
+// ─── Forum (Espace Papas) ───────────────────────────────────────────────────
+
+model Category {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String       @unique
+  createdAt   DateTime     @default(now()) @map("created_at")
+  discussions Discussion[]
+
+  @@map("categories")
+}
+
+model Discussion {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  content     String
+  authorId    String   @map("author_id") @db.Uuid
+  categoryId  String   @map("category_id") @db.Uuid
+  isAnonymous Boolean  @default(false) @map("is_anonymous")
+  status      String   @default("active") // active | flagged | archived
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author   User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  messages Message[]
+  reports  Report[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([createdAt(sort: Desc)])
+  @@index([status])
+  @@map("discussions")
+}
+
+model Message {
+  id           String   @id @default(uuid()) @db.Uuid
+  content      String
+  authorId     String   @map("author_id") @db.Uuid
+  discussionId String   @map("discussion_id") @db.Uuid
+  isFlagged    Boolean  @default(false) @map("is_flagged")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  reports    Report[]
+
+  @@index([discussionId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+model Report {
+  id           String    @id @default(uuid()) @db.Uuid
+  reason       String
+  reporterId   String    @map("reporter_id") @db.Uuid
+  discussionId String?   @map("discussion_id") @db.Uuid
+  messageId    String?   @map("message_id") @db.Uuid
+  status       String    @default("pending") // pending | warning | suspended | dismissed
+  resolvedAt   DateTime? @map("resolved_at")
+  resolvedById String?   @map("resolved_by_id") @db.Uuid
+  resolution   String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  reporter   User        @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  resolvedBy User?       @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  discussion Discussion? @relation(fields: [discussionId], references: [id], onDelete: SetNull)
+  message    Message?    @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@index([reporterId])
+  @@index([discussionId])
+  @@index([messageId])
+  @@index([status])
+  @@map("reports")
+}
+
+// ─── Notifications ──────────────────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String   // ex: "account.welcome", "forum.new_reply"
+  title     String
+  body      String
+  link      String?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id              String  @id @default(uuid()) @db.Uuid
+  userId          String  @unique @map("user_id") @db.Uuid
+  emailAccount    Boolean @default(true) @map("email_account")
+  emailForum      Boolean @default(true) @map("email_forum")
+  emailCommunity  Boolean @default(true) @map("email_community")
+  emailProgramme  Boolean @default(true) @map("email_programme")
+  emailAdmin      Boolean @default(true) @map("email_admin")
+  emailEngagement  Boolean @default(true) @map("email_engagement")
+  emailMessagerie  Boolean @default(true) @map("email_messagerie")
+  inappAccount     Boolean @default(true) @map("inapp_account")
+  inappForum      Boolean @default(true) @map("inapp_forum")
+  inappCommunity  Boolean @default(true) @map("inapp_community")
+  inappProgramme  Boolean @default(true) @map("inapp_programme")
+  inappAdmin      Boolean @default(true) @map("inapp_admin")
+  inappEngagement  Boolean @default(true) @map("inapp_engagement")
+  inappMessagerie  Boolean @default(true) @map("inapp_messagerie")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+// ─── Content (articles, ressources, pages, programmes) ──────────────────────
+
+model Content {
+  id          String   @id @default(uuid()) @db.Uuid
+  type        String   // article | resource | page | programme
+  title       String
+  slug        String   @unique
+  body        String
+  isPublished Boolean  @default(false) @map("is_published")
+  authorId    String   @map("author_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([isPublished])
+  @@index([createdAt(sort: Desc)])
+  @@map("contents")
+}
+
+// ─── Payments ───────────────────────────────────────────────────────────────
+
+model Payment {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  amount            Int      // montant en centimes
+  currency          String   @default("EUR")
+  status            String   @default("success") // success | failed | refunded
+  type              String   // subscription | donation
+  provider          String   @default("stripe") // stripe | paypal | manual
+  providerPaymentId String?  @map("provider_payment_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("payments")
+}
+
+// ─── Site Settings ──────────────────────────────────────────────────────────
+
+model SiteSetting {
+  id    String @id @default(uuid()) @db.Uuid
+  key   String @unique
+  value String
+
+  @@map("site_settings")
+}
+
+// ─── Admin Notification Log ─────────────────────────────────────────────────
+
+model AdminNotificationLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  type           String   // global | group | individual
+  subject        String
+  body           String
+  sentById       String   @map("sent_by_id") @db.Uuid
+  recipientCount Int      @default(0) @map("recipient_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  sentBy User @relation(fields: [sentById], references: [id], onDelete: Cascade)
+
+  @@index([createdAt(sort: Desc)])
+  @@map("admin_notification_logs")
+}
+
+// ─── Volunteer Applications ─────────────────────────────────────────────────
+
+model VolunteerApplication {
+  id           String   @id @default(uuid()) @db.Uuid
+  fullName     String   @map("full_name")
+  email        String
+  phone        String?
+  city         String
+  availability String
+  motivation   String
+  experience   String?
+  status       String   @default("pending") // pending | accepted | rejected | contacted
+  adminNotes   String?  @map("admin_notes")
+  userId       String?  @map("user_id") @db.Uuid
+  reviewedById String?  @map("reviewed_by_id") @db.Uuid
+  reviewedAt   DateTime? @map("reviewed_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user       User? @relation("VolunteerAppApplicant", fields: [userId], references: [id], onDelete: SetNull)
+  reviewedBy User? @relation("VolunteerAppReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("volunteer_applications")
+}
+
+// ─── Private Messaging (Messagerie Privée) ─────────────────────────────────
+
+model PrivateConversation {
+  id          String    @id @default(uuid()) @db.Uuid
+  fatherId    String    @map("father_id") @db.Uuid
+  volunteerId String?   @map("volunteer_id") @db.Uuid
+  subject     String
+  status      String    @default("open") // open | closed
+  closedAt    DateTime? @map("closed_at")
+  closedById  String?   @map("closed_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  father    User              @relation("ConversationFather", fields: [fatherId], references: [id], onDelete: Cascade)
+  volunteer User?             @relation("ConversationVolunteer", fields: [volunteerId], references: [id], onDelete: SetNull)
+  closedBy  User?             @relation("ConversationCloser", fields: [closedById], references: [id], onDelete: SetNull)
+  messages  PrivateMessage[]
+
+  @@index([fatherId])
+  @@index([volunteerId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("private_conversations")
+}
+
+model PrivateMessage {
+  id             String   @id @default(uuid()) @db.Uuid
+  conversationId String   @map("conversation_id") @db.Uuid
+  senderId       String   @map("sender_id") @db.Uuid
+  senderRole     String   @map("sender_role") // member | volunteer | admin
+  content        String
+  attachmentName String?  @map("attachment_name")
+  attachmentMime String?  @map("attachment_mime")
+  attachmentSize Int?     @map("attachment_size")
+  attachmentData Bytes?   @map("attachment_data")
+  isRead         Boolean  @default(false) @map("is_read")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation PrivateConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User                @relation("PrivateMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([conversationId, isRead])
+  @@map("private_messages")
+}
+
+// ─── Volunteer Dashboard ────────────────────────────────────────────────────
+
+model VolunteerProfile {
+  id             String        @id @default(uuid()) @db.Uuid
+  userId         String        @unique @map("user_id") @db.Uuid
+  volunteerRole  VolunteerRole @map("volunteer_role")
+  bio            String?
+  city           String?
+  maxAssignments Int           @default(3) @map("max_assignments")
+  isActive       Boolean       @default(true) @map("is_active")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments         PapaAssignment[]
+  availabilities      VolunteerAvailability[]
+  alerts              VolunteerAlert[]
+  appointments        VolunteerAppointment[]
+  appointmentRequests AppointmentRequest[]
+
+  @@map("volunteer_profiles")
+}
+
+model PapaAssignment {
+  id          String    @id @default(uuid()) @db.Uuid
+  volunteerId String    @map("volunteer_id") @db.Uuid
+  fatherId    String    @map("father_id") @db.Uuid
+  status      String    @default("active") // active | paused | completed
+  notes       String?
+  startDate   DateTime  @default(now()) @map("start_date")
+  endDate     DateTime? @map("end_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  volunteer VolunteerProfile @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  father    User             @relation("AssignedFather", fields: [fatherId], references: [id], onDelete: Cascade)
+
+  @@unique([volunteerId, fatherId])
+  @@index([volunteerId])
+  @@index([fatherId])
+  @@map("papa_assignments")
+}
+
+model VolunteerAvailability {
+  id           String    @id @default(uuid()) @db.Uuid
+  profileId    String    @map("profile_id") @db.Uuid
+  dayOfWeek    Int       @map("day_of_week") // 0=lundi ... 6=dimanche
+  startTime    String    @map("start_time") // "09:00"
+  endTime      String    @map("end_time") // "12:00"
+  isRecurring  Boolean   @default(true) @map("is_recurring")
+  specificDate DateTime? @map("specific_date") // pour RDV ponctuels
+  label        String? // "RDV papa Martin"
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  profile VolunteerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("volunteer_availabilities")
+}
+
+model VolunteerAlert {
+  id          String    @id @default(uuid()) @db.Uuid
+  profileId   String    @map("profile_id") @db.Uuid
+  fatherId    String?   @map("father_id") @db.Uuid
+  type        String // "diagnostic_critique" | "signalement_manuel" | "inactivite"
+  priority    String    @default("medium") // "low" | "medium" | "high" | "critical"
+  title       String
+  description String?
+  isResolved  Boolean   @default(false) @map("is_resolved")
+  resolvedAt  DateTime? @map("resolved_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  profile VolunteerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  father  User?            @relation("AlertFather", fields: [fatherId], references: [id])
+
+  @@index([profileId, isResolved])
+  @@index([priority])
+  @@map("volunteer_alerts")
+}
+
+model VolunteerAppointment {
+  id          String          @id @default(uuid()) @db.Uuid
+  profileId   String          @map("profile_id") @db.Uuid
+  fatherId    String          @map("father_id") @db.Uuid
+  type        AppointmentType
+  scheduledAt DateTime        @map("scheduled_at")
+  duration    Int             @default(60) // minutes
+  status      String          @default("a_venir") // a_venir | termine | annule
+  location    String? // adresse pour terrain, null pour tel
+  notes       String?
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  profile VolunteerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  father  User             @relation("AppointmentFather", fields: [fatherId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, scheduledAt])
+  @@index([fatherId])
+  @@map("volunteer_appointments")
+}
+
+// ─── Appointment Requests (Parent → Bénévole) ──────────────────────────────
+
+model AppointmentRequest {
+  id            String                   @id @default(uuid()) @db.Uuid
+  userId        String                   @map("user_id") @db.Uuid
+  type          AppointmentType
+  reason        String?                  // ex: "tribunal_jaf", "commissariat", etc.
+  message       String?
+  city          String?
+  location      String?                  // adresse précise du lieu
+  phone         String?
+  preferredDate DateTime?                @map("preferred_date")
+  status        AppointmentRequestStatus @default(en_attente)
+  volunteerId   String?                  @map("volunteer_id") @db.Uuid
+  appointmentId String?                  @map("appointment_id") @db.Uuid
+  responseNote  String?                  @map("response_note")
+  createdAt     DateTime                 @default(now()) @map("created_at")
+  updatedAt     DateTime                 @updatedAt @map("updated_at")
+
+  user      User              @relation("AppointmentRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+  volunteer VolunteerProfile? @relation(fields: [volunteerId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([volunteerId])
+  @@index([createdAt(sort: Desc)])
+  @@map("appointment_requests")
+}
+
+// ─── Professional Validation ────────────────────────────────────────────────
+
+model ProfessionalVerification {
+  id                         String   @id @default(uuid()) @db.Uuid
+  userId                     String   @unique @map("user_id") @db.Uuid
+  diplomaUploaded            Boolean  @default(false) @map("diploma_uploaded")
+  insuranceUploaded          Boolean  @default(false) @map("insurance_uploaded")
+  officialRegistrationNumber String?  @map("official_registration_number")
+  registrationVerified       Boolean  @default(false) @map("registration_verified")
+  interviewCompleted         Boolean  @default(false) @map("interview_completed")
+  interviewScore             Int?     @map("interview_score")
+  adminNotes                 String?  @map("admin_notes")
+  validatedByAdminId         String?  @map("validated_by_admin_id") @db.Uuid
+  validatedAt                DateTime? @map("validated_at")
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+
+  user              User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  validatedByAdmin  User? @relation("ProfessionalVerificationAdmin", fields: [validatedByAdminId], references: [id], onDelete: SetNull)
+
+  @@index([validatedByAdminId])
+  @@index([interviewCompleted, registrationVerified])
+  @@map("professional_verifications")
+}
+
+model ProfessionalDocument {
+  id           String                   @id @default(uuid()) @db.Uuid
+  userId       String                   @map("user_id") @db.Uuid
+  documentType ProfessionalDocumentType @map("document_type")
+  fileUrl      String                   @map("file_url")
+  uploadedAt   DateTime                 @default(now()) @map("uploaded_at")
+  verified     Boolean                  @default(false)
+  verifiedAt   DateTime?                @map("verified_at")
+  verifiedById String?                  @map("verified_by_id") @db.Uuid
+
+  user       User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verifiedBy User? @relation("ProfessionalDocumentVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  @@index([userId, documentType])
+  @@index([verified])
+  @@map("professional_documents")
+}
+
+model ProfessionalReview {
+  id             String   @id @default(uuid()) @db.Uuid
+  professionalId String   @map("professional_id") @db.Uuid
+  memberId       String   @map("member_id") @db.Uuid
+  rating         Int
+  comment        String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  professional User @relation("ProfessionalReviewRecipient", fields: [professionalId], references: [id], onDelete: Cascade)
+  member       User @relation("ProfessionalReviewAuthor", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([professionalId, createdAt(sort: Desc)])
+  @@index([memberId])
+  @@map("professional_reviews")
+}
+
+model GeneratedDocument {
+  id                String                @id @default(uuid()) @db.Uuid
+  userId            String                @map("user_id") @db.Uuid
+  documentType      GeneratedDocumentType @map("document_type")
+  fileUrl           String                @map("file_url")
+  content           String
+  isSigned          Boolean               @default(false) @map("is_signed")
+  signatureProvider String?               @map("signature_provider")
+  signedAt          DateTime?             @map("signed_at")
+  createdAt         DateTime              @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, documentType])
+  @@index([isSigned])
+  @@map("generated_documents")
+}
+
+model AdminActionLog {
+  id          String          @id @default(uuid()) @db.Uuid
+  actionType  AdminActionType @map("action_type")
+  actorId     String          @map("actor_id") @db.Uuid
+  targetUserId String?        @map("target_user_id") @db.Uuid
+  metadata    Json?
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  actor      User  @relation("AdminActionActor", fields: [actorId], references: [id], onDelete: Cascade)
+  targetUser User? @relation("AdminActionTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([actionType, createdAt(sort: Desc)])
+  @@index([actorId])
+  @@index([targetUserId])
+  @@map("admin_action_logs")
+}
+
+// ─── Enfants ─────────────────────────────────────────────────────────────────
+
+enum ChildSex {
+  garcon
+  fille
+}
+
+model Enfant {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  prenom    String
+  sexe      ChildSex
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("enfants")
+}
+
+// ─── Accompagnement Requests (Maman) ────────────────────────────────────────
+
+model AccompagnementRequest {
+  id                     String                       @id @default(uuid()) @db.Uuid
+  userId                 String                       @map("user_id") @db.Uuid
+  fatherFirstName        String                       @map("father_first_name")
+  fatherCity             String                       @map("father_city")
+  fatherPhone            String                       @map("father_phone")
+  fatherEmail            String?                      @map("father_email")
+  situationDescription   String                       @map("situation_description")
+  motherPhone            String                       @map("mother_phone")
+  enfantsData            Json?                        @map("enfants_data")
+  status                 AccompagnementRequestStatus   @default(pending)
+  adminNotes             String?                      @map("admin_notes")
+  createdAt              DateTime                     @default(now()) @map("created_at")
+  updatedAt              DateTime                     @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("accompagnement_requests")
+}

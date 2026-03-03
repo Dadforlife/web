@@ -1,19 +1,8 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 
+// Legacy callback — no longer used with Auth.js credentials flow.
+// Redirects to login.
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
-
-  if (code) {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
-  }
-
-  // En cas d'erreur, rediriger vers login
-  return NextResponse.redirect(`${origin}/auth/login?error=auth`);
+  const { origin } = new URL(request.url);
+  return NextResponse.redirect(`${origin}/auth/login`);
 }

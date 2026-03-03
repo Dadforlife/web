@@ -1,63 +1,16 @@
 import { EventCard } from "@/components/event-card";
 import { Calendar } from "lucide-react";
 
-const events = [
-  {
-    title: "Groupe de parole - Gestion du stress",
-    description:
-      "Échangez avec d'autres pères sur les techniques de gestion du stress liées à la séparation.",
-    date: "Mar. 25 mars",
-    time: "20h00",
-    duration: "1h30",
-    maxParticipants: 12,
-    currentParticipants: 8,
-    type: "groupe_parole" as const,
-  },
-  {
-    title: "Visio juridique - Questions/Réponses",
-    description:
-      "Session de questions-réponses avec Me Sophie Durand, avocate spécialisée en droit familial.",
-    date: "Jeu. 27 mars",
-    time: "19h00",
-    duration: "1h",
-    maxParticipants: 20,
-    currentParticipants: 14,
-    type: "visio_juridique" as const,
-  },
-  {
-    title: "Atelier - Communication bienveillante",
-    description:
-      "Apprenez les techniques de communication non-violente pour des échanges constructifs avec l'autre parent.",
-    date: "Sam. 29 mars",
-    time: "10h00",
-    duration: "2h",
-    maxParticipants: 15,
-    currentParticipants: 6,
-    type: "atelier" as const,
-  },
-  {
-    title: "Conférence - La coparentalité positive",
-    description:
-      "Conférence du Dr. Philippe Martin sur les fondamentaux d'une coparentalité centrée sur l'enfant.",
-    date: "Mar. 1 avril",
-    time: "20h30",
-    duration: "1h30",
-    maxParticipants: 50,
-    currentParticipants: 23,
-    type: "conference" as const,
-  },
-  {
-    title: "Groupe de parole - Mon rôle de père",
-    description:
-      "Un espace bienveillant pour discuter de votre identité de père après la séparation.",
-    date: "Jeu. 3 avril",
-    time: "20h00",
-    duration: "1h30",
-    maxParticipants: 12,
-    currentParticipants: 4,
-    type: "groupe_parole" as const,
-  },
-];
+const events: {
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  duration: string;
+  maxParticipants: number;
+  currentParticipants: number;
+  type: "groupe_parole" | "visio_juridique" | "atelier" | "conference";
+}[] = [];
 
 export default function CalendrierPage() {
   return (
@@ -81,17 +34,29 @@ export default function CalendrierPage() {
       </div>
 
       {/* Liste des événements */}
-      <div className="space-y-4">
-        {events.map((event, i) => (
-          <div
-            key={event.title + event.date}
-            className="animate-fade-in-up"
-            style={{ animationDelay: `${0.1 + i * 0.06}s`, animationFillMode: "both" }}
-          >
-            <EventCard {...event} />
-          </div>
-        ))}
-      </div>
+      {events.length > 0 ? (
+        <div className="space-y-4">
+          {events.map((event, i) => (
+            <div
+              key={event.title + event.date}
+              className="animate-fade-in-up"
+              style={{ animationDelay: `${0.1 + i * 0.06}s`, animationFillMode: "both" }}
+            >
+              <EventCard {...event} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 rounded-2xl border border-border/50 bg-card/50">
+          <Calendar className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
+          <p className="text-muted-foreground">
+            Aucun événement prévu pour le moment.
+          </p>
+          <p className="text-sm text-muted-foreground/70 mt-1">
+            Les prochaines rencontres seront affichées ici.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

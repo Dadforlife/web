@@ -40,7 +40,7 @@ export function SectionPublic() {
               id="public-heading"
               className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight"
             >
-              À qui s&apos;adresse Dad for Life ?
+              À qui s&apos;adresse Papa pour la vie ?
             </h2>
           </div>
         </BlurFade>

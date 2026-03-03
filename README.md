@@ -20,6 +20,24 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+### Confirmation d’email (inscription)
+
+Après inscription, les utilisateurs doivent confirmer leur adresse email. À configurer dans Supabase :
+
+1. **Authentication → URL Configuration** : ajouter l’URL de redirection (ex. `http://localhost:3000/auth/callback` et l’URL de prod) dans **Redirect URLs**.
+2. **Authentication → Providers → Email** : activer **Confirm email** pour exiger la confirmation avant connexion.
+3. **Authentication → Email Templates** : personnaliser le template « Confirm signup » si besoin.
+4. Définir `NEXT_PUBLIC_APP_URL` dans `.env.local` (ex. `http://localhost:3000` en dev, `https://votredomaine.com` en prod) pour que le lien dans l’email pointe vers votre app.
+
+### Espace Papas (forum)
+
+Le forum des pères utilise Prisma sur la même base PostgreSQL (Supabase).
+
+1. **Migration Supabase** : appliquer `supabase/migrations/004_espace_papas.sql` (tables `categories`, `discussions`, `messages`, `reports` + RLS + seed des catégories).
+2. **Variables d’environnement** : dans `.env.local`, ajouter `DATABASE_URL` (et éventuellement `DIRECT_URL` pour les migrations Prisma) avec l’URL de connexion Postgres de Supabase (Settings → Database → Connection string).
+3. **Générer le client Prisma** : `npm run db:generate` (ou `npx prisma generate`).
+4. **Accès** : `/espace-papas` (réservé aux utilisateurs connectés ; redirection vers la page de connexion si besoin).
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

@@ -3,38 +3,7 @@
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Marquee } from "@/components/ui/marquee";
 
-const testimonials = [
-  {
-    name: "Thomas D.",
-    role: "Papa solo",
-    text: "Dad for Life m'a aidé à retrouver confiance en moi et à reconstruire ma relation avec mes enfants.",
-  },
-  {
-    name: "Marc L.",
-    role: "En séparation",
-    text: "Le programme m'a donné les outils pour gérer la coparentalité avec sérénité. Je recommande à tous les pères.",
-  },
-  {
-    name: "Julien P.",
-    role: "Papa en couple",
-    text: "Grâce à la communauté, j'ai compris que je n'étais pas seul. Les échanges avec d'autres pères sont précieux.",
-  },
-  {
-    name: "Sébastien R.",
-    role: "Papa solo",
-    text: "Le module sur la stabilisation émotionnelle a changé ma façon de gérer les moments difficiles.",
-  },
-  {
-    name: "Antoine M.",
-    role: "En séparation",
-    text: "Les professionnels du réseau m'ont accompagné dans mes démarches juridiques. Un vrai soutien.",
-  },
-  {
-    name: "Nicolas B.",
-    role: "Père engagé",
-    text: "Un programme concret et bien structuré. En 6 semaines, j'ai retrouvé un cadre solide pour ma famille.",
-  },
-];
+const testimonials: { name: string; role: string; text: string }[] = [];
 
 function TestimonialCard({ name, role, text }: { name: string; role: string; text: string }) {
   return (
@@ -58,6 +27,8 @@ function TestimonialCard({ name, role, text }: { name: string; role: string; tex
 }
 
 export function SectionTestimonials() {
+  if (testimonials.length === 0) return null;
+
   return (
     <section className="py-20 sm:py-28 overflow-hidden relative">
       <div className="absolute inset-0 gradient-mesh" />

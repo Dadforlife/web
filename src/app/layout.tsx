@@ -5,13 +5,16 @@ import { Footer } from "@/components/footer";
 import { LayoutWrapper } from "@/components/layout-wrapper";
 import { CookieConsent } from "@/components/cookie-consent";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { Toaster } from "@/components/ui/sonner";
+import { LogoutToast } from "@/components/logout-toast";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Dad for Life - Rester un père à chaque étape de votre vie familiale",
+  title: "Papa pour la vie - Accompagnement des pères dans leur rôle parental",
   description:
-    "Association d'accompagnement des pères : père solo, en couple ou en instance de séparation. Diagnostic personnalisé, parcours structuré et réseau de professionnels qualifiés pour retrouver stabilité et présence auprès de vos enfants.",
+    "Association loi 1901 d'accompagnement, de soutien et de formation des pères. Promotion d'une paternité responsable, engagée et stable. Parcours structuré et réseau de professionnels qualifiés.",
   openGraph: {
-    title: "Dad for Life - Accompagnement structuré des pères",
+    title: "Papa pour la vie - Accompagnement structuré des pères",
     description:
       "Un accompagnement personnalisé pour les pères. Stabilisation émotionnelle, cadre parental, communication apaisée. Un père stable aujourd'hui, un enfant plus équilibré demain.",
   },
@@ -41,6 +44,10 @@ export default function RootLayout({
         >
           {children}
         </LayoutWrapper>
+        <Toaster position="top-center" richColors closeButton />
+        <Suspense>
+          <LogoutToast />
+        </Suspense>
         <CookieConsent />
         <ScrollToTop />
       </body>

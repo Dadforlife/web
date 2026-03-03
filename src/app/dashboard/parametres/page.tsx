@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState, useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,8 +19,13 @@ import {
   Bell,
   Save,
   Check,
+  Baby,
+  Plus,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { useDashboardUser } from "@/components/dashboard-provider";
+import { addEnfant, removeEnfant } from "./actions";
 
 function getInitials(name: string) {
   return name
@@ -50,11 +55,27 @@ export default function ParametresPage() {
   const [phone, setPhone] = useState(user.phone || "");
   const [notifications, setNotifications] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [showAddChild, setShowAddChild] = useState(false);
+  const [addChildState, addChildAction, isAddingChild] = useActionState(
+    async (prev: { error?: string; success?: boolean } | undefined, formData: FormData) => {
+      const result = await addEnfant(prev, formData);
+      if (result?.success) setShowAddChild(false);
+      return result;
+    },
+    undefined,
+  );
+  const [_isRemoving, startRemoveTransition] = useTransition();
 
   function handleSave() {
     // TODO: Implémenter la mise à jour via Supabase
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  }
+
+  function handleRemoveChild(enfantId: string) {
+    startRemoveTransition(async () => {
+      await removeEnfant(enfantId);
+    });
   }
 
   return (
@@ -156,6 +177,133 @@ export default function ParametresPage() {
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Mes enfants */}
+      <Card className="rounded-2xl animate-fade-in-up" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Baby className="h-5 w-5" />
+            Mes enfants
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {user.enfants.length === 0 && !showAddChild && (
+            <p className="text-sm text-muted-foreground">
+              Aucun enfant enregistr&eacute; pour le moment.
+            </p>
+          )}
+
+          {user.enfants.length > 0 && (
+            <div className="space-y-3">
+              {user.enfants.map((enfant) => (
+                <div
+                  key={enfant.id}
+                  className="flex items-center justify-between p-3 rounded-xl border border-border/70 bg-muted/30"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Baby className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">
+                        {enfant.prenom}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {enfant.sexe === "garcon" ? "Gar\u00e7on" : "Fille"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveChild(enfant.id)}
+                    className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                    title="Retirer cet enfant"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showAddChild && (
+            <form action={addChildAction} className="p-4 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 space-y-3">
+              {addChildState?.error && (
+                <p className="text-sm text-destructive font-medium">
+                  {addChildState.error}
+                </p>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label htmlFor="newChildPrenom" className="text-sm font-medium">
+                    Pr&eacute;nom
+                  </label>
+                  <input
+                    id="newChildPrenom"
+                    name="prenom"
+                    type="text"
+                    required
+                    placeholder="Pr&eacute;nom de l'enfant"
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-colors"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="newChildSexe" className="text-sm font-medium">
+                    Sexe
+                  </label>
+                  <select
+                    id="newChildSexe"
+                    name="sexe"
+                    required
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-colors"
+                  >
+                    <option value="">S&eacute;lectionner...</option>
+                    <option value="garcon">Gar&ccedil;on</option>
+                    <option value="fille">Fille</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="rounded-lg"
+                  disabled={isAddingChild}
+                >
+                  {isAddingChild ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-1" />
+                  )}
+                  Ajouter
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-lg"
+                  onClick={() => setShowAddChild(false)}
+                >
+                  Annuler
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {!showAddChild && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-lg"
+              onClick={() => setShowAddChild(true)}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Ajouter un enfant
+            </Button>
+          )}
         </CardContent>
       </Card>
 

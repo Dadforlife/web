@@ -12,9 +12,12 @@ export function LayoutWrapper({
   footer: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isDashboard = pathname.startsWith("/dashboard");
+  const hasSidebar =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/espace-papas") ||
+    pathname.startsWith("/admin");
 
-  if (isDashboard) {
+  if (hasSidebar) {
     return <>{children}</>;
   }
 

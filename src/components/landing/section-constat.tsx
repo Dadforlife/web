@@ -80,7 +80,7 @@ export function SectionConstat() {
         <BlurFade delay={0.6} inView>
           <div className="mt-14 text-center space-y-3">
             <p className="text-foreground text-xl font-semibold">
-              Quelle que soit votre situation familiale, Dad for Life est l&agrave; pour vous accompagner.
+              Quelle que soit votre situation familiale, Papa pour la vie est l&agrave; pour vous accompagner.
             </p>
             <p className="text-muted-foreground text-lg">
               Avec m&eacute;thode, respect et discr&eacute;tion.

@@ -5,62 +5,15 @@ import { Button } from "@/components/ui/button";
 import { PartnerCard } from "@/components/partner-card";
 import { Search, Filter } from "lucide-react";
 
-const partners = [
-  {
-    name: "Me Sophie Durand",
-    type: "avocat",
-    description:
-      "Avocate spécialisée en droit familial avec 15 ans d'expérience. Accompagnement dans les procédures de divorce et garde d'enfants.",
-    city: "Paris 8e",
-    email: "sophie.durand@cabinet.fr",
-    phone: "01 42 00 00 00",
-    website: "https://example.com",
-  },
-  {
-    name: "Marie Lefèvre",
-    type: "mediateur",
-    description:
-      "Médiatrice familiale diplômée d'État. Spécialiste de la médiation parentale et de la gestion des conflits.",
-    city: "Lyon 3e",
-    email: "marie.lefevre@mediation.fr",
-    phone: "04 78 00 00 00",
-  },
-  {
-    name: "Dr. Philippe Martin",
-    type: "psychologue",
-    description:
-      "Psychologue clinicien spécialisé dans l'accompagnement des pères en situation de séparation.",
-    city: "Marseille 6e",
-    email: "p.martin@psy.fr",
-    phone: "04 91 00 00 00",
-  },
-  {
-    name: "Thomas Bernard",
-    type: "coach",
-    description:
-      "Coach certifié en développement personnel et parental. Accompagnement individuel et en groupe.",
-    city: "Bordeaux",
-    email: "thomas@coaching-parental.fr",
-    website: "https://example.com",
-  },
-  {
-    name: "Me Antoine Moreau",
-    type: "avocat",
-    description:
-      "Avocat au barreau de Nantes, spécialité droit de la famille. Médiation et contentieux.",
-    city: "Nantes",
-    email: "a.moreau@avocat.fr",
-    phone: "02 40 00 00 00",
-  },
-  {
-    name: "Claire Dubois",
-    type: "mediateur",
-    description:
-      "Médiatrice familiale et thérapeute systémique. Approche centrée sur l'intérêt de l'enfant.",
-    city: "Toulouse",
-    email: "claire.dubois@mediation.fr",
-  },
-];
+const partners: {
+  name: string;
+  type: string;
+  description: string;
+  city: string;
+  email: string;
+  phone?: string;
+  website?: string;
+}[] = [];
 
 const filterTypes = [
   { value: "all", label: "Tous" },
@@ -142,7 +95,9 @@ export default function AnnuairePage() {
       ) : (
         <div className="text-center py-12">
           <p className="text-muted-foreground">
-            Aucun partenaire trouvé pour cette recherche.
+            {searchQuery || activeFilter !== "all"
+              ? "Aucun partenaire trouvé pour cette recherche."
+              : "L'annuaire des partenaires est en cours de constitution."}
           </p>
         </div>
       )}

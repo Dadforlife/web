@@ -83,7 +83,7 @@ function formatDiagnosticDate(iso: string): string {
 }
 
 interface DiagnosticResultCardProps {
-  /** Afficher le lien "Refaire le diagnostic" (page diagnostic) ou "Voir le diagnostic" (dashboard) */
+  /** Afficher le lien "Refaire l'évaluation" (page diagnostic) ou "Voir l'évaluation" (dashboard) */
   showLink?: boolean;
   /** Contexte : "dashboard" | "diagnostic" pour adapter le lien et le titre */
   context?: "dashboard" | "diagnostic";
@@ -124,7 +124,7 @@ export function DiagnosticResultCard({
       <Card className="rounded-2xl">
         <CardContent className="py-8">
           <p className="text-center text-sm text-muted-foreground">
-            Chargement de ton diagnostic…
+            Chargement de ton évaluation…
           </p>
         </CardContent>
       </Card>
@@ -139,15 +139,15 @@ export function DiagnosticResultCard({
             <ClipboardList className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="mt-3 text-sm font-medium text-foreground">
-            Aucun diagnostic enregistré
+            Aucune évaluation enregistrée
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             Réponds au questionnaire pour obtenir ta météo de situation et un plan d&apos;action personnalisé.
           </p>
           {showLink && (
             <Button asChild className="mt-4" size="sm">
-              <Link href="/dashboard/diagnostic">
-                Faire le diagnostic <ArrowRight className="ml-1 h-4 w-4" />
+              <Link href={context === "diagnostic" ? "/dashboard/diagnostic?refaire=1" : "/dashboard/diagnostic"}>
+                Faire l'évaluation <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -178,7 +178,7 @@ export function DiagnosticResultCard({
               </p>
               <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                 <Calendar className="h-3.5 w-3.5" />
-                Diagnostic du {formatDiagnosticDate(diagnostic.created_at)}
+                Évaluation du {formatDiagnosticDate(diagnostic.created_at)}
               </p>
             </div>
           </div>
@@ -207,10 +207,10 @@ export function DiagnosticResultCard({
         {showLink && (
           <div className="pt-2">
             <Button variant="outline" size="sm" asChild>
-              <Link href="/dashboard/diagnostic">
+              <Link href={context === "diagnostic" ? "/dashboard/diagnostic?refaire=1" : "/dashboard/diagnostic"}>
                 {context === "diagnostic"
-                  ? "Refaire le diagnostic"
-                  : "Voir le diagnostic"}
+                  ? "Refaire l'évaluation"
+                  : "Voir l'évaluation"}
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>

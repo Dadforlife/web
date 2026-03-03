@@ -15,16 +15,15 @@ export function Footer() {
             <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
               <Image
                 src="/logo.svg"
-                alt="Dad for Life"
+                alt="Papa pour la vie"
                 width={40}
                 height={40}
                 className="h-10 w-10 object-contain brightness-0 invert"
               />
-              <span className="text-xl font-bold tracking-tight">Dad for Life</span>
+              <span className="text-xl font-bold tracking-tight">Papa pour la vie</span>
             </Link>
             <p className="text-sm text-primary-foreground/85 leading-relaxed max-w-sm">
-              Association d&apos;accompagnement des p&egrave;res : stabilisation
-              &eacute;motionnelle, cadre parental et orientation vers des professionnels qualifi&eacute;s.
+              Association loi 1901 d&apos;accompagnement, de soutien et de formation des p&egrave;res dans leur r&ocirc;le parental.
             </p>
           </div>
 
@@ -34,6 +33,12 @@ export function Footer() {
               Liens rapides
             </h3>
             <nav className="flex flex-col gap-3">
+              <Link href="/qui-sommes-nous" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors rounded-md py-1">
+                Qui sommes-nous
+              </Link>
+              <Link href="/devenir-benevole" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors rounded-md py-1">
+                Devenir bénévole
+              </Link>
               <Link href="/diagnostic" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors rounded-md py-1">
                 Demander un accompagnement
               </Link>
@@ -50,15 +55,15 @@ export function Footer() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2 text-sm text-primary-foreground/80">
                 <Mail className="h-4 w-4" />
-                <span>contact@dadforlife.fr</span>
+                <a href="mailto:contact@dadforlife.org" className="hover:text-primary-foreground transition-colors">contact@dadforlife.org</a>
               </div>
               <div className="flex items-center gap-2 text-sm text-primary-foreground/80">
                 <Phone className="h-4 w-4" />
-                <span>01 23 45 67 89</span>
+                <a href="tel:+33764278987" className="hover:text-primary-foreground transition-colors">07 64 27 89 87</a>
               </div>
               <div className="flex items-center gap-2 text-sm text-primary-foreground/80">
                 <MapPin className="h-4 w-4" />
-                <span>Paris, France</span>
+                <span>44300 Nantes</span>
               </div>
             </div>
           </div>
@@ -67,12 +72,18 @@ export function Footer() {
         <Separator className="my-10 bg-primary-foreground/15" />
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-primary-foreground/65 text-center md:text-left">
-          <p>&copy; {new Date().getFullYear()} Dad for Life. Tous droits réservés.</p>
+          <p>&copy; {new Date().getFullYear()} Papa pour la vie. Tous droits réservés.</p>
           <div className="flex flex-wrap gap-3 sm:gap-4 justify-center md:justify-end">
-            <Link href="#" className="hover:text-primary-foreground transition-colors">
+            <Link href="/mentions-legales" className="hover:text-primary-foreground transition-colors">
               Mentions légales
             </Link>
-            <Link href="#" className="hover:text-primary-foreground transition-colors">
+            <Link href="/cgu" className="hover:text-primary-foreground transition-colors">
+              CGU
+            </Link>
+            <Link href="/cgv" className="hover:text-primary-foreground transition-colors">
+              CGV
+            </Link>
+            <Link href="/politique-confidentialite" className="hover:text-primary-foreground transition-colors">
               Politique de confidentialité
             </Link>
           </div>
