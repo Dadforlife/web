@@ -15,8 +15,9 @@ import { notify } from "@/lib/notifications";
 export async function setProfessionalStatus(
   userId: string,
   status: ProfessionalStatus,
-  adminNotes?: string,
+  adminNotesOrFormData?: string | FormData,
 ) {
+  const adminNotes = typeof adminNotesOrFormData === "string" ? adminNotesOrFormData : undefined;
   const admin = await requireAdmin();
 
   await prisma.$transaction(async (tx) => {
@@ -117,7 +118,7 @@ export async function saveInterview(
   revalidatePath(`/admin/professionnels/${userId}`);
 }
 
-export async function verifyProfessionalDocument(documentId: string) {
+export async function verifyProfessionalDocument(documentId: string, _formData?: FormData) {
   const admin = await requireAdmin();
 
   const document = await prisma.professionalDocument.update({
@@ -145,6 +146,7 @@ export async function verifyProfessionalDocument(documentId: string) {
 export async function generateProfessionalDocument(
   userId: string,
   documentType: GeneratedDocumentType,
+  _formData?: FormData,
 ) {
   const admin = await requireAdmin();
   const user = await prisma.user.findUniqueOrThrow({
