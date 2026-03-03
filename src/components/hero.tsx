@@ -78,7 +78,7 @@ export function Hero() {
                   asChild
                   className="h-13 rounded-xl border-primary/25 bg-card/80 px-7 backdrop-blur-sm hover:bg-card"
                 >
-                  <Link href="/programme">
+                  <Link href="/#programme">
                     D&eacute;couvrir le programme
                     <PlayCircle className="h-4 w-4" />
                   </Link>
