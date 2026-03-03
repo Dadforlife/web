@@ -235,7 +235,9 @@ export async function POST(
       attachmentName: attachment?.name,
       attachmentMime: attachment?.mime,
       attachmentSize: attachment?.size,
-      attachmentData: attachment?.data,
+      attachmentData: attachment?.data
+        ? new Uint8Array(attachment.data)
+        : undefined,
     },
     select: {
       id: true,
