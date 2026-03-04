@@ -45,7 +45,7 @@ export function SectionPublic() {
           </div>
         </BlurFade>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto" role="list">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
           {profils.map((profil, i) => (
             <BlurFade key={profil.name} delay={0.1 + i * 0.1} inView>
               <MagicCard
