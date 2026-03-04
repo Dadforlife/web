@@ -1,18 +1,46 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
+import { webPageJsonLd, breadcrumbJsonLd, jsonLd } from "@/lib/structured-data";
 
-export const metadata: Metadata = {
-  title: "Qui sommes-nous | Papa pour la vie",
+export const metadata = buildMetadata({
+  title: "Qui sommes-nous - Notre mission et notre vision",
   description:
     "Papa pour la vie accompagne les pères en difficulté familiale : apaiser, protéger, former. Découvrez notre mission, notre vision et notre approche structurée pour construire des pères solides et des familles équilibrées.",
-  openGraph: {
-    title: "Qui sommes-nous | Papa pour la vie",
-    description:
-      "Construire des pères solides pour des familles équilibrées. Notre mission : apaiser, protéger, former. Accompagnement responsable et orienté solutions.",
-  },
-};
+  path: "/qui-sommes-nous",
+  keywords: [
+    "association pères",
+    "mission papa pour la vie",
+    "accompagnement parental",
+    "paternité engagée",
+    "à propos papa pour la vie",
+  ],
+});
 
 export default function QuiSommesNousLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(
+          webPageJsonLd({
+            title: "Qui sommes-nous",
+            description:
+              "Construire des pères solides pour des familles équilibrées. Notre mission : apaiser, protéger, former.",
+            path: "/qui-sommes-nous",
+          })
+        )}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(
+          breadcrumbJsonLd([
+            { name: "Accueil", path: "/" },
+            { name: "Qui sommes-nous", path: "/qui-sommes-nous" },
+          ])
+        )}
+      />
+      {children}
+    </>
+  );
 }

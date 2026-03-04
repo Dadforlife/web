@@ -336,21 +336,27 @@ model NotificationPreference {
 // ─── Content (articles, ressources, pages, programmes) ──────────────────────
 
 model Content {
-  id          String   @id @default(uuid()) @db.Uuid
-  type        String   // article | resource | page | programme
-  title       String
-  slug        String   @unique
-  body        String
-  isPublished Boolean  @default(false) @map("is_published")
-  authorId    String   @map("author_id") @db.Uuid
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id               String   @id @default(uuid()) @db.Uuid
+  type             String   // article | resource | page | programme
+  title            String
+  slug             String   @unique
+  body             String
+  isPublished      Boolean  @default(false) @map("is_published")
+  authorId         String   @map("author_id") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  // SEO fields
+  metaDescription  String?  @map("meta_description")
+  featuredImageUrl String?  @map("featured_image_url")
+  excerpt          String?
+  publishedAt      DateTime? @map("published_at")
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([type])
   @@index([isPublished])
   @@index([createdAt(sort: Desc)])
+  @@index([type, isPublished])
   @@map("contents")
 }
 

@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Politique de confidentialité - Papa pour la vie",
-};
+export const metadata = buildMetadata({
+  title: "Politique de confidentialité",
+  description:
+    "Politique de confidentialité de Papa pour la vie : collecte de données, droits RGPD, cookies, sécurité des informations personnelles.",
+  path: "/politique-confidentialite",
+});
 
 export default function PolitiqueConfidentialitePage() {
   return (

@@ -1,14 +1,16 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Sidebar } from "@/components/sidebar";
 
-export const metadata: Metadata = {
-  title: "Espace Papas | Papa pour la vie",
+export const metadata = buildMetadata({
+  title: "Espace Papas",
   description:
     "Forum d'échange entre pères : garde, relation avec la maman, éducation, moral, témoignages. Un espace bienveillant réservé aux papas inscrits.",
-};
+  path: "/espace-papas",
+  noIndex: true,
+});
 
 export default async function EspacePapasLayout({
   children,

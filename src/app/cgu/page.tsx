@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Conditions Générales d'Utilisation - Papa pour la vie",
-};
+export const metadata = buildMetadata({
+  title: "Conditions Générales d'Utilisation",
+  description:
+    "Conditions générales d'utilisation du site Papa pour la vie : règles d'inscription, droits et obligations des utilisateurs, modération et responsabilités.",
+  path: "/cgu",
+});
 
 export default function CGUPage() {
   return (

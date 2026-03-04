@@ -1,13 +1,20 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import { auth } from "@/lib/auth";
 import { DiagnosticForm } from "./diagnostic-form";
 import { ClipboardCheck } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Demande d\u2019accompagnement \u2013 Évaluation initiale | Papa pour la vie",
+export const metadata = buildMetadata({
+  title: "Demande d'accompagnement - Évaluation initiale",
   description:
-    "Questionnaire d'évaluation pour évaluer votre situation et déterminer le niveau d\u2019accompagnement adapté. Adhésion gratuite, confidentiel, sans engagement.",
-};
+    "Questionnaire d'évaluation pour évaluer votre situation et déterminer le niveau d'accompagnement adapté. Adhésion gratuite, confidentiel, sans engagement.",
+  path: "/diagnostic",
+  keywords: [
+    "diagnostic parental",
+    "évaluation père",
+    "questionnaire séparation",
+    "accompagnement personnalisé",
+  ],
+});
 
 export default async function DiagnosticPage() {
   let isLoggedIn = false;

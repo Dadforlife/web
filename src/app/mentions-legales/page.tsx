@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Mentions légales - Papa pour la vie",
-};
+export const metadata = buildMetadata({
+  title: "Mentions légales",
+  description:
+    "Mentions légales du site Papa pour la vie : éditeur, hébergement, propriété intellectuelle, protection des données personnelles et droit applicable.",
+  path: "/mentions-legales",
+});
 
 export default function MentionsLegalesPage() {
   return (

@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Conditions Générales de Vente - Papa pour la vie",
-};
+export const metadata = buildMetadata({
+  title: "Conditions Générales de Vente",
+  description:
+    "Conditions générales de vente de Papa pour la vie : tarifs des services, modalités de paiement, droit de rétractation et remboursement.",
+  path: "/cgv",
+});
 
 export default function CGVPage() {
   return (
