@@ -29,7 +29,7 @@ export function Hero() {
       <div className="absolute inset-0 gradient-mesh opacity-60" />
 
       <div className="relative container mx-auto px-4 pt-6 sm:pt-8 md:pt-10 pb-16 sm:pb-24 md:pb-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start max-w-6xl mx-auto">
           <div className="text-center lg:text-left space-y-8">
             <BlurFade delay={0} inView>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card/70 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-primary shadow-sm">
