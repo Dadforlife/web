@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
+import { authFromRequest } from "@/lib/mobile-auth";
 import { prisma } from "@/lib/prisma";
 import { validateReport } from "@/lib/forum/validation";
 import { notifyPostReported } from "@/lib/notification-triggers";
 
-export async function POST(request: Request) {
-  const session = await auth();
+export async function POST(request: NextRequest) {
+  const session = await authFromRequest(request);
   if (!session?.user?.id) {
     return NextResponse.json(
       { error: "Non autorisé. Connectez-vous pour signaler." },

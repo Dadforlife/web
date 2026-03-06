@@ -143,6 +143,7 @@ model User {
   accompagnementRequests     AccompagnementRequest[]
   enfants                    Enfant[]
   appointmentRequests        AppointmentRequest[]       @relation("AppointmentRequestUser")
+  pushTokens                 PushToken[]
 
   @@index([status])
   @@index([primaryRole])
@@ -748,4 +749,20 @@ model AccompagnementRequest {
   @@index([status])
   @@index([createdAt(sort: Desc)])
   @@map("accompagnement_requests")
+}
+
+// ─── Push Notification Tokens (Mobile) ──────────────────────────────────────
+
+model PushToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique
+  platform  String   // "ios" | "android"
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_tokens")
 }

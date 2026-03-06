@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, PlayCircle, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { ArrowRight, CheckCircle2, PlayCircle, ShieldCheck, Users } from "lucide-react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { Particles } from "@/components/ui/particles";
 import { Button } from "@/components/ui/button";
+import { AudioTestimonials } from "@/components/audio-testimonials";
 
 const heroImage = "/hero-image.svg";
 
@@ -27,7 +28,7 @@ export function Hero() {
 
       <div className="absolute inset-0 gradient-mesh opacity-60" />
 
-      <div className="relative container mx-auto px-4 py-16 sm:py-24 md:py-32">
+      <div className="relative container mx-auto px-4 pt-6 sm:pt-8 md:pt-10 pb-16 sm:pb-24 md:pb-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center max-w-6xl mx-auto">
           <div className="text-center lg:text-left space-y-8">
             <BlurFade delay={0} inView>
@@ -86,6 +87,10 @@ export function Hero() {
               </div>
             </BlurFade>
 
+            <BlurFade delay={0.35} inView>
+              <AudioTestimonials />
+            </BlurFade>
+
             <BlurFade delay={0.4} inView>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 max-w-xl mx-auto lg:mx-0">
                 <div className="glass rounded-xl border border-border/60 p-3 text-left">
@@ -114,7 +119,7 @@ export function Hero() {
                   <span>Accompagnement humain</span>
                 </div>
                 <div className="inline-flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-warm" />
+                  <CheckCircle2 className="h-4 w-4 text-chart-4" />
                   <span>Sans engagement</span>
                 </div>
               </div>

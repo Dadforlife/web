@@ -14,7 +14,7 @@ import {
   User,
   Baby,
   Gavel,
-  Sparkles,
+  UserCheck,
   ClipboardList,
   Users,
   TrendingUp,
@@ -110,7 +110,7 @@ const CIBLES = [
   { text: "Pères confrontés à un conflit parental", icon: AlertTriangle },
   { text: "Pères souhaitant protéger leur lien avec leur enfant", icon: Baby },
   { text: "Pères voulant éviter l'escalade judiciaire", icon: Gavel },
-  { text: "Pères prêts à s'impliquer activement", icon: Sparkles },
+  { text: "Pères prêts à s'impliquer activement", icon: UserCheck },
 ];
 
 const PAS_UN = [

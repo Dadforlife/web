@@ -15,7 +15,6 @@ import {
   MapPin,
   Phone,
   Shield,
-  Sparkles,
   UserPlus,
   Users,
   Video,
@@ -170,7 +169,7 @@ export default function DevenirBenevolePage() {
             className="space-y-7"
           >
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/85 px-4 py-1.5 text-sm font-medium text-primary shadow-sm backdrop-blur">
-              <Sparkles className="h-4 w-4" />
+              <BadgeCheck className="h-4 w-4" />
               Rejoindre les bénévoles Papa pour la vie
             </span>
             <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">

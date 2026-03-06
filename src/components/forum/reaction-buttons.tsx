@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, ThumbsUp, Sparkles } from "lucide-react";
+import { Heart, ThumbsUp, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type ReactionType = "soutenir" | "je-comprends" | "merci";
@@ -13,7 +13,7 @@ const CONFIG: Record<
 > = {
   soutenir: { label: "Soutenir", icon: Heart },
   "je-comprends": { label: "Je comprends", icon: ThumbsUp },
-  merci: { label: "Merci pour ton partage", icon: Sparkles },
+  merci: { label: "Merci pour ton partage", icon: Gift },
 };
 
 type Props = {

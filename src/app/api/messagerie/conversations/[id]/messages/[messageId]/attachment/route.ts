@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { authFromRequest } from "@/lib/mobile-auth";
 import { prisma } from "@/lib/prisma";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string; messageId: string }> }
 ) {
-  const session = await auth();
+  const session = await authFromRequest(request);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non autorise" }, { status: 401 });
   }

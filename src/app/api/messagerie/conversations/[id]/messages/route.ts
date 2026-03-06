@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { authFromRequest } from "@/lib/mobile-auth";
 import { prisma } from "@/lib/prisma";
 import { validateCreateMessage } from "@/lib/messagerie/validation";
 import { sanitizeForStorage } from "@/lib/forum/sanitize";
@@ -61,7 +61,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
+  const session = await authFromRequest(request);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
@@ -137,7 +137,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
+  const session = await authFromRequest(request);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
