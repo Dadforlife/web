@@ -127,7 +127,7 @@ export function Hero() {
           </div>
 
           <BlurFade delay={0.3} inView direction="right">
-            <div className="relative flex justify-center lg:justify-end">
+            <div className="relative flex justify-center lg:justify-end mt-[35px]">
               <div className="relative w-full max-w-md aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-border/50">
                 <Image
                   src={heroImage}
